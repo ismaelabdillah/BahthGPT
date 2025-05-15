@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: bahthgpt
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python embed_and_index.py && gunicorn app:app
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
