@@ -1,3 +1,13 @@
+from flask import Flask, request, jsonify
+import os
+import difflib
+
+app = Flask(__name__)
+MAX_FILE_SIZE = 20 * 1024 * 1024  # 20 MB max per file
+
+def is_fuzzy_match(query, line, threshold=0.7):
+    return difflib.SequenceMatcher(None, query, line).ratio() >= threshold
+
 @app.route('/search', methods=['POST'])
 def search():
     try:
@@ -8,7 +18,7 @@ def search():
         if not query:
             return jsonify({"error": "Empty query"}), 400
     except Exception as e:
-        return jsonify({"error": "Invalid request: " + str(e)}), 400
+        return jsonify({"error": f"Invalid request: {str(e)}"}), 400
 
     matches = []
 
@@ -16,8 +26,10 @@ def search():
         for fname in files:
             if fname.endswith('.txt'):
                 if target_file and target_file != fname:
-                    continue  # skip files that aren't the target
+                    continue
                 fpath = os.path.join(root, fname)
+                if os.path.getsize(fpath) > MAX_FILE_SIZE:
+                    continue
                 try:
                     with open(fpath, 'r', encoding='utf-8') as f:
                         for i, line in enumerate(f):
@@ -44,3 +56,7 @@ def search():
         "results_found": len(matches),
         "results": matches
     })
+
+@app.route('/')
+def home():
+    return 'BahthGPT Arabic search backend is running.'
