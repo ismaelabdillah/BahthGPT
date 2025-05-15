@@ -1,13 +1,16 @@
-from flask import Flask, request, jsonify
 import os
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-TEXT_DIR = './texts'  # or wherever your .txt files are inside BahthGPT
+TEXT_DIR = './texts'
 
 @app.route('/search', methods=['POST'])
 def search():
     query = request.json.get('query', '').lower()
     matches = []
+
+    if not os.path.exists(TEXT_DIR):
+        return jsonify({"error": "Text directory not found."}), 500
 
     for fname in os.listdir(TEXT_DIR):
         if fname.endswith('.txt'):
