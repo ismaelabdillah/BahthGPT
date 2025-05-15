@@ -2,3 +2,4 @@ flask
 chromadb
 openai
 tqdm
+gunicorn
